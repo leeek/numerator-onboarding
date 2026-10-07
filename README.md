@@ -4,6 +4,10 @@ A small metadata-first Python exercise for University of Michigan faculty and
 researchers. Local development uses invented data only; no real Numerator data
 is included or needed. Requires Python 3.10 or newer.
 
+**New here?** Follow the setup instructions below, starting with prerequisites.
+**Already set up?** Jump to the [daily browser VS Code workflow](#great-lakes-browser-vs-code-daily-workflow)
+or [choosing resources and batch jobs](#choosing-resources-and-batch-jobs).
+
 ## Prerequisites: accounts and data access
 
 Before starting the Great Lakes setup, have the following ready:
@@ -54,7 +58,7 @@ Copy this prompt, replacing the two placeholders:
 > YOUR_UNIQNAME and my authorized Slurm account is YOUR_SLURM_ACCOUNT. I am an
 > empirical researcher, not a software engineer. Inspect what is already installed
 > and complete the setup steps you can; explain briefly what each stage does.
-> Use browser VS Code through Open OnDemand with 12 hours, 2 cores, and 8 GB.
+> Use browser VS Code through Open OnDemand with 18 hours, 2 cores, and 8 GB.
 > Help me create a private copy using the GitHub template, or start with the public
 > starter for practice if Git authentication would delay setup. Keep Python work
 > on an allocated compute node and use synthetic data only during setup. Do not
@@ -126,10 +130,10 @@ For later sessions, use `cd ~/numerator-onboarding` and `git pull --ff-only`
 instead. Stop if Git reports conflicting local changes; do not reset them away.
 Check that the commit matches the one you intended to transfer.
 
-Request a 12-hour interactive allocation:
+Request an 18-hour interactive allocation:
 
 ```sh
-salloc --account=YOUR_SLURM_ACCOUNT --partition=standard --nodes=1 --ntasks=1 --cpus-per-task=2 --mem=8G --time=12:00:00
+salloc --account=YOUR_SLURM_ACCOUNT --partition=standard --nodes=1 --ntasks=1 --cpus-per-task=2 --mem=8G --time=18:00:00
 hostname
 echo "$SLURM_JOB_ID"
 squeue -u "$USER"
@@ -140,7 +144,7 @@ on a compute node. Confirm the hostname matches your job's node, not `gl-login*`
 If the shell remains on a login node after allocation, use `srun --pty bash -l`
 and check again. The resources above are a starting point for development and
 metadata work, not a recommendation for full data scans. Keep the session open;
-12 hours is the allocation limit, not a guarantee against connection loss or
+18 hours is the allocation limit, not a guarantee against connection loss or
 shell idle timeouts. Exit when finished so the allocation can be released.
 
 On the allocated compute node, create a separate Linux environment once; never
@@ -183,7 +187,9 @@ The recommended editor is **Visual Studio Code through Great Lakes Open OnDemand
 with the official Codex extension running in the same compute allocation. Your
 browser is the interface; Python and Codex's commands run on Great Lakes. Local
 work remains synthetic-only. First create the cluster checkout and environment
-using the explicit one-time commands above.
+using the explicit one-time commands above. For later sessions, reuse the setup
+file and installed extensions; start at step 2. If a session is still running,
+reconnect through **My Interactive Sessions** instead of launching another job.
 
 1. Create `~/numerator-ood-setup.sh` on Great Lakes using a text editor. Its contents
    should be the following (replace the environment path and use the same Python
@@ -202,7 +208,7 @@ using the explicit one-time commands above.
 
 2. Open [Great Lakes Open OnDemand](https://greatlakes.arc-ts.umich.edu), sign in,
    and choose **Interactive Apps → Visual Studio Code**. Request your own Slurm
-   account, `standard` partition, **12 hours**, **2 cores**, and **8 GB total memory**.
+   account, `standard` partition, **18 hours**, **2 cores**, and **8 GB total memory**.
    Select code-server **4.112.0** if available (the pilot version). Set **Source this
    setup file** to `/home/YOUR_UNIQNAME/numerator-ood-setup.sh`. Launch the job.
 3. Under **My Interactive Sessions**, wait for **Running**, then **Connect to VS Code**.
@@ -247,6 +253,70 @@ catalog, and DuckDB example. A second 12-hour allocation on a different compute
 node retained the Codex installation and sign-in; Codex ran all 10 tests there.
 A one-file real Parquet footer check also succeeded without reading observations.
 Extension versions may change through auto-update.
+
+## Choosing resources and batch jobs
+
+Browser VS Code already runs inside a Slurm compute allocation. It is suitable
+for writing code, debugging, inspecting metadata, and exploring a small, explicitly
+filtered part of the data. You can request more resources for interactive work,
+but a long, repeatable cleaning run is usually better as a separate batch job.
+
+### What can I change when launching VS Code?
+
+Set these fields in the Open OnDemand launch form before starting a new session:
+
+| Setting | Starter default | When to change it |
+| --- | --- | --- |
+| Slurm account | Your authorized account | Use the allocation that supports your project. |
+| Partition | `standard` | Keep this for ordinary Python/Parquet work; special partitions require a specific need and appropriate access. |
+| Number of hours | **18** | Request enough time for your session. This is a maximum duration, not a promise of immediate availability. |
+| Number of cores | **2** | Increase when your query or code actually uses parallel workers/threads. Extra cores do not automatically speed up a serial Python loop. |
+| Memory (GB) | **8 GB total** | Increase when a measured pilot needs more memory, especially for joins, sorts, and large intermediate results. |
+| Source this setup file | Your `numerator-ood-setup.sh` | Change when switching project environments; keep its Python module and environment path consistent. |
+
+These are development defaults, not sizing advice for the full Numerator dataset.
+As a modest next experiment, 4 cores and 16 GB may suit a larger interactive pilot,
+but measure rather than treating those numbers as a guarantee. Larger requests
+can wait longer in the queue and reserve more shared resources. Save your work
+and launch a new allocation to change the resource request; changing a Python
+setting does not enlarge the current Slurm allocation. Stop sessions when finished.
+
+### Interactive or batch?
+
+| Task | Suggested approach |
+| --- | --- |
+| Develop a cleaning rule and inspect aggregate checks | Browser VS Code on one explicitly selected partition or other bounded input. |
+| Debug a join that needs more memory while inspecting intermediate results | A larger interactive session, sized from a pilot. |
+| Clean many months, rebuild a large derived dataset, or run unattended | A Python script submitted as a Slurm batch job. |
+| Repeat the same independent operation across many partitions | Start with one batch job; consider a job array after validating the operation. |
+
+For batch work, continue editing in VS Code, but submit a separate job with
+`sbatch`. Its CPU, memory, and time requests are independent of the editor's
+allocation. Slurm runs it on allocated compute resources and writes its logs;
+it does not depend on keeping the editor session alive. Keep the account, paths,
+and resource requests visible in an ordinary `.sbatch` file. Do not run a large
+cleaning script directly on a login node. Store real-data outputs and potentially
+sensitive logs outside this repository in an approved Great Lakes location.
+
+Before scaling up, select only needed partitions and columns, measure elapsed time
+and peak memory, and leave headroom. Compressed Parquet file size is not the memory
+requirement. Configure DuckDB/Arrow workers to respect allocated cores and leave
+memory for Python and the editor. A `LIMIT` alone does not guarantee a small scan.
+The exact resources and batching strategy belong in each research project's code
+and notes, rather than being fixed for everyone in this starter.
+
+A useful request to Codex once your small pilot works:
+
+> Read AGENTS.md and inspect my cleaning script. Help me turn it into a Slurm batch
+> job with explicit account, input/output paths, CPU, memory, and time requests.
+> First propose a bounded pilot and explain how to measure its resource use. Use
+> those measurements to recommend a full-run request; do not submit the full scan
+> yet. Keep real-data outputs and logs outside Git and do not print observations
+> or identifiers. Show the commands to submit, monitor, and cancel the job.
+
+References: [Slurm batch submission](https://slurm.schedmd.com/sbatch.html),
+[job accounting and memory statistics](https://slurm.schedmd.com/sacct.html), and
+[Great Lakes limits](https://documentation.its.umich.edu/arc-hpc/greatlakes/user-guide/defaults-limits).
 
 ## First real-data check: one Parquet footer
 
