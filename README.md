@@ -4,6 +4,29 @@ A small metadata-first Python exercise for University of Michigan faculty and
 researchers. Local development uses invented data only; no real Numerator data
 is included or needed. Requires Python 3.10 or newer.
 
+## Prerequisites: accounts and data access
+
+Before starting the Great Lakes setup, have the following ready:
+
+- **Your U-M uniqname and Great Lakes access.** You will use your U-M login and
+  MFA to sign in to the cluster and Open OnDemand. Obtain Great Lakes access
+  through your department or U-M ARC if you do not already have it.
+- **Your authorized Slurm account.** This is the allocation/billing account used
+  to request compute time, not your login name. Ask your department or U-M ARC
+  which account you should use. For example, Kevin's uniqname is `kvnlee` and his
+  Slurm account is `kvnlee0` (a zero appended to the uniqname). This is an example,
+  not a naming rule: confirm your assigned account rather than guessing it or
+  using the instructor's account.
+- **Numerator data access.** Open the
+  [Ross Research Computing datasets page](https://rossrc.bus.umich.edu/databases.html),
+  find **Numerator** under **Other Datasets**, and click **Request access to Numerator**.
+  This permission is separate from Great Lakes access and access to this public
+  repository. You can complete setup and the synthetic exercises while waiting
+  for approval; real-data work requires that access to be granted.
+- **A GitHub account.** Sign in before creating your own project from the template.
+  If you do not have an account, create one first. You can browse this guide and
+  clone the public starter for practice without signing in.
+
 ## Start here: let an assistant help with setup
 
 You do not need to understand every shell command before starting. The suggested
@@ -17,7 +40,7 @@ commands below remain available for checking what happened and diagnosing failur
    prompts. In **Settings → Computer use**, connect Google Chrome using the
    offered browser-extension setup. Availability depends on your account and region.
 3. In Chrome, sign in to **GitHub** and **Great Lakes Open OnDemand**. Have your
-   own Slurm account name ready; the next section explains what that is.
+   own Slurm account name ready, as explained in the prerequisites above.
 4. Start a desktop task with `@Chrome` and paste the prompt below. You can provide
    this repository's URL without first downloading or cloning anything yourself.
 5. Stay available for passwords, U-M MFA, ChatGPT sign-in, and permission prompts.
@@ -48,14 +71,7 @@ signed-in browser merely because you share this URL.
 See OpenAI's [Computer Use setup](https://learn.chatgpt.com/docs/computer-use) and
 [desktop/browser task guide](https://learn.chatgpt.com/use-cases/use-your-computer-with-codex).
 
-## Accounts and your own project
-
-Obtain your own Great Lakes access and an authorized Slurm allocation/billing
-account through your department or U-M ARC. Do not use the instructor's account.
-For example, Kevin's uniqname is `kvnlee` and his Slurm account is `kvnlee0` (a zero
-appended to the uniqname). This is an example, not a naming rule: confirm your
-assigned account rather than guessing it. Access to the Numerator directory is
-separate from access to this starter repository.
+## Create your own project
 
 This is a public GitHub template. **Sign in to GitHub first** (create a free
 GitHub account if you do not have one), then return to
