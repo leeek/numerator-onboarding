@@ -543,3 +543,9 @@ Official references:
 - [Great Lakes defaults and limits](https://documentation.its.umich.edu/arc-hpc/greatlakes/user-guide/defaults-limits)
 - [ITS VS Code, Open OnDemand, and proxy guidance](https://documentation.its.umich.edu/arc-hpc/open-ondemand/vs-code)
 - [OpenAI Codex IDE extension](https://developers.openai.com/codex/ide)
+
+**Help improve this guide:** If a setup step is confusing or fails,
+[open an issue](https://github.com/leeek/numerator-onboarding/issues) describing
+where you got stuck and the error message. Remove credentials and any Numerator
+data before posting. Suggested fixes and pull requests are welcome—you can ask
+Codex to help prepare one.
