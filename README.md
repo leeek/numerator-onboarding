@@ -108,11 +108,48 @@ On your laptop, in a terminal:
 ssh YOUR_UNIQNAME@greatlakes.arc-ts.umich.edu
 ```
 
-Complete password/MFA authentication yourself. On the Great Lakes login node,
-clone your private repository once. GitHub authentication is separate from your
-U-M login; GitHub account passwords do not work for Git HTTPS authentication.
-Use an existing authenticated Git setup or ask Codex to help configure it without
-sharing tokens.
+Complete password/MFA authentication yourself.
+
+### GitHub authentication on Great Lakes
+
+Your private repository requires GitHub authentication **on Great Lakes**, even
+if you are already signed into GitHub in your laptop browser. You normally do
+this once per Great Lakes account.
+
+In your Great Lakes terminal, check whether GitHub CLI is installed:
+
+```sh
+gh --version
+```
+
+If it is installed, run:
+
+```sh
+gh auth login --hostname github.com --git-protocol https --web
+```
+
+Choose **Yes** when asked to authenticate Git. The terminal displays a one-time
+code. Open [github.com/login/device](https://github.com/login/device) in your
+laptop browser, enter the code, and complete authorization. If the cluster cannot
+open a browser automatically, open the link yourself.
+
+Then run:
+
+```sh
+gh auth setup-git --hostname github.com
+```
+
+If `gh` is not found, give your setup assistant this prompt:
+
+> Help me install the official GitHub CLI in my Great Lakes home directory without
+> administrator privileges. Make it available in future terminal sessions, then
+> start GitHub device sign-in and let me complete authorization in my browser.
+> Configure Git to use GitHub CLI credentials and verify authentication without
+> pushing anything. Do not ask me to paste tokens or credential files into chat.
+
+### Clone your project and create its Python environment
+
+On the Great Lakes login node, clone your private repository once.
 
 Replace `YOUR_REPOSITORY_HTTPS_URL` with the URL you copied from **your private
 repository**, and run these commands from your home directory. If
@@ -470,6 +507,7 @@ Check failures one layer at a time:
 
 | Symptom | First check |
 | --- | --- |
+| Cloning or pushing reports missing GitHub authentication | Follow [GitHub authentication on Great Lakes](#github-authentication-on-great-lakes). Signing into GitHub on your laptop does not authenticate Git on the cluster. |
 | SSH fails | Account access, network/VPN requirements, and password/MFA; Python is not involved yet. |
 | Slurm rejects the request | Allocation account and partition eligibility; ask the allocation owner if unknown. |
 | Job remains pending | `squeue -u "$USER"` shows its state/reason; wait for resources. |
