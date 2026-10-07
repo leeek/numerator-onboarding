@@ -4,12 +4,209 @@ A small metadata-first Python exercise for University of Michigan faculty and
 researchers. Local development uses invented data only; no real Numerator data
 is included or needed. Requires Python 3.10 or newer.
 
-## Setup and verification
+## Accounts and your own project
+
+Obtain your own Great Lakes access and an authorized Slurm allocation/billing
+account through your department or U-M ARC. Do not use the instructor's account.
+For example, Kevin's uniqname is `kvnlee` and his Slurm account is `kvnlee0` (a zero
+appended to the uniqname). This is an example, not a naming rule: confirm your
+assigned account rather than guessing it. Access to the Numerator directory is
+separate from access to this starter repository.
+
+This is a public GitHub template. To start your own research project, click **Use this template → Create a new repository**, give your project
+a name, and choose **Private**. Then clone your new repository onto Great Lakes
+using its **Code → HTTPS** URL in the clone command below. This makes an independent
+starting copy; later starter updates are not applied automatically. Keep research
+data outside Git, even in a private repository.
+
+For a first practice session, cloning the starter directly is sufficient. You do
+not need to create a fork or learn how to synchronize one to run the exercises.
+
+## Where to start
+
+For Great Lakes, complete **One-time cluster checkout and Python environment**
+below, then use **Great Lakes browser VS Code** for everyday work. Local practice
+is optional. The initial SSH setup creates files and an environment; daily work
+uses the browser and does not require configuring Remote-SSH.
+
+## Great Lakes browser VS Code: daily workflow
+
+The recommended editor is **Visual Studio Code through Great Lakes Open OnDemand**,
+with the official Codex extension running in the same compute allocation. Your
+browser is the interface; Python and Codex's commands run on Great Lakes. Local
+work remains synthetic-only. First create the cluster checkout and environment
+using the explicit one-time commands in the next section.
+
+1. Create `~/numerator-ood-setup.sh` on Great Lakes using a text editor. Its contents
+   should be the following (replace the environment path and use the same Python
+   module that created your environment):
+
+   ```sh
+   source /etc/profile.d/http_proxy.sh
+   module load python/3.12.1
+   source /home/YOUR_UNIQNAME/numerator-onboarding/.venv/bin/activate
+   ```
+
+   This short file is sourced **before the editor starts**, so extensions inherit
+   the compute-node internet proxy and Python environment. It does not submit jobs
+   or hide Slurm commands. If your environment uses a standalone Python installation,
+   omit `module load python`; that is the configuration used in the pilot.
+
+2. Open [Great Lakes Open OnDemand](https://greatlakes.arc-ts.umich.edu), sign in,
+   and choose **Interactive Apps → Visual Studio Code**. Request your own Slurm
+   account, `standard` partition, **12 hours**, **2 cores**, and **8 GB total memory**.
+   Select code-server **4.112.0** if available (the pilot version). Set **Source this
+   setup file** to `/home/YOUR_UNIQNAME/numerator-ood-setup.sh`. Launch the job.
+3. Under **My Interactive Sessions**, wait for **Running**, then **Connect to VS Code**.
+   Open your cluster repository folder. In **Terminal → New Terminal**, run:
+
+   ```sh
+   hostname
+   echo "$SLURM_JOB_ID"
+   .venv/bin/python --version
+   NUMERATOR_ROOT=tests/data/fake_numerator .venv/bin/python -m pytest
+   NUMERATOR_ROOT=tests/data/fake_numerator .venv/bin/python -m numerator_onboarding.catalog
+   ```
+
+   Match the hostname and job ID to the portal session. Stop if you are on a login
+   node. The fixture counts should be 4, 4, and 6 rows (see the table above).
+4. Open **Extensions**, search for **Codex**, and install **Codex – OpenAI's coding
+   agent**, publisher **openai**, identifier **openai.chatgpt**. Open its sidebar.
+   Choose ChatGPT sign-in using a **device code**. Open the displayed authentication
+   link in your laptop browser and enter the code. If asked, enable device-code
+   sign-in in your ChatGPT account's Security settings yourself, then retry.
+   Keep authentication codes and credential files out of this repository.
+5. Ask Codex to verify the installation using the prompt below. Keep execution in
+   this workspace, rather than delegating the task to a cloud environment:
+
+   > Read AGENTS.md. Check hostname and SLURM_JOB_ID and confirm this is an allocated
+   > compute node. Use .venv/bin/python with NUMERATOR_ROOT=tests/data/fake_numerator
+   > to run pytest and python -m numerator_onboarding.catalog. Do not access real
+   > data or modify source files. Report the node, job, Python version, test result,
+   > and synthetic table counts. If something fails, diagnose that layer first.
+
+Reopen the running session through **My Interactive Sessions** after closing the
+browser. Closing the browser does not release the allocation. When finished,
+stop/delete that specific session in the portal to release its resources. When
+its time limit expires, launch a new session; the old compute-node URL is temporary.
+The checkout lives in your home directory, so it survives allocation expiry.
+
+**Validation:** code-server 4.112.0, the official Codex extension, and Python 3.12
+were exercised on a Great Lakes compute node. Codex ran tests and the synthetic
+catalog; browser reload preserved sign-in and the completed chat. A separate
+checkout and new environment created with `python/3.12.1` also passed the tests,
+catalog, and DuckDB example. Extension versions may change through auto-update.
+
+## One-time cluster checkout and Python environment: explicit commands
+
+If transferring changes from an existing local checkout, commit and push the code
+you intend to run. Check `git status --short` and `git diff --cached` first. A new
+user can start by cloning without making any commits.
+Replace `YOUR_UNIQNAME` and `YOUR_SLURM_ACCOUNT` below with your own values. The
+Slurm account is an allocation/billing account, not necessarily your uniqname.
+
+On your laptop, in a terminal:
+
+```sh
+ssh YOUR_UNIQNAME@greatlakes.arc-ts.umich.edu
+```
+
+Complete password/MFA authentication yourself. On the Great Lakes login node,
+clone once (GitHub authentication is separate from cluster authentication):
+
+```sh
+git clone https://github.com/leeek/numerator-onboarding.git
+cd numerator-onboarding
+git log -1 --oneline
+```
+
+For later sessions, use `cd ~/numerator-onboarding` and `git pull --ff-only`
+instead. Stop if Git reports conflicting local changes; do not reset them away.
+Check that the commit matches the one you intended to transfer.
+
+Request a 12-hour interactive allocation:
+
+```sh
+salloc --account=YOUR_SLURM_ACCOUNT --partition=standard --nodes=1 --ntasks=1 --cpus-per-task=2 --mem=8G --time=12:00:00
+hostname
+echo "$SLURM_JOB_ID"
+squeue -u "$USER"
+```
+
+Wait for the allocation to start. Great Lakes' `salloc` normally places the shell
+on a compute node. Confirm the hostname matches your job's node, not `gl-login*`.
+If the shell remains on a login node after allocation, use `srun --pty bash -l`
+and check again. The resources above are a starting point for development and
+metadata work, not a recommendation for full data scans. Keep the session open;
+12 hours is the allocation limit, not a guarantee against connection loss or
+shell idle timeouts. Exit when finished so the allocation can be released.
+
+On the allocated compute node, create a separate Linux environment once; never
+copy the laptop's `.venv` to Great Lakes:
+
+```sh
+cd ~/numerator-onboarding
+module load python/3.12.1
+python3 --version  # Expect Python 3.12.x
+python3 -m venv .venv
+source .venv/bin/activate
+source /etc/profile.d/http_proxy.sh
+python -m pip install -e '.[dev]'
+NUMERATOR_ROOT=tests/data/fake_numerator python -m pytest
+NUMERATOR_ROOT=tests/data/fake_numerator python -m numerator_onboarding.catalog
+NUMERATOR_ROOT=tests/data/fake_numerator python examples/duckdb_query.py
+```
+
+On subsequent sessions, load the same Python module and activate `.venv` again.
+The tested module is `python/3.12.1`; use it consistently when creating and
+activating the environment.
+If installation cannot reach the package index from the compute node, follow
+ITS's documented proxy setup (`source /etc/profile.d/http_proxy.sh`) and retry.
+
+## First real-data check: one Parquet footer
+
+Only when you decide to inspect real metadata, use one known Parquet file in
+the allocated shell. Obtain its relative path on Great Lakes from your data
+manager or by browsing there; do not paste filenames containing identifiers
+into an AI chat. Replace the sample relative path below. This reads one footer,
+without recursively discovering files, reading column statistics, or scanning
+observations:
+
+```sh
+NUMERATOR_ROOT=/nfs/turbo/bus-kbaldata/Numerator python - 'people_table/REPLACE_WITH_RELATIVE_FILE.parquet' <<'PY'
+import json
+import sys
+import pyarrow.parquet as pq
+from numerator_onboarding.config import data_root
+
+try:
+    with pq.ParquetFile(data_root() / sys.argv[1]) as parquet:
+        result = {
+            "files_inspected": 1,
+            "rows_in_this_file": parquet.metadata.num_rows,
+            "columns": [
+                {"name": field.name, "type": str(field.type), "nullable": field.nullable}
+                for field in parquet.schema_arrow
+            ],
+        }
+except Exception:
+    raise SystemExit("Metadata check failed: check the path, access, and Parquet format on Great Lakes.") from None
+print(json.dumps(result, indent=2))
+PY
+```
+
+The result describes that file only, not table-wide row counts or schema
+consistency. The full catalog visits every matching file, so run it later in a
+compute allocation after the one-file check succeeds. A one-file footer check has been exercised on an allocated Great Lakes compute
+node. It does not validate a full-tree catalog or an observation scan.
+
+## Local practice with synthetic data
 
 From the repository root:
 
 ```sh
-python3.10 -m venv .venv
+python3 --version  # Must be 3.10 or newer
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
 export NUMERATOR_ROOT="$PWD/tests/data/fake_numerator"
@@ -67,7 +264,9 @@ grocery | 4 | 70.00
 online | 2 | 16.50
 ```
 
-DuckDB recognizes Hive directory partitions. Unlike the catalog, this query scans
+This teaching example rejects a `NUMERATOR_ROOT` other than the repository's
+synthetic fixture, before opening DuckDB. DuckDB recognizes Hive directory partitions.
+Unlike the catalog, this query scans
 selected column data. A small result or a `LIMIT` does not guarantee a small scan.
 Before adapting it to real data, inspect the actual schema and add appropriate
 partition filters. The illustrative `channel` and `spend` fields are not promised
@@ -75,8 +274,8 @@ to exist in the real tables.
 
 ## Working with real data
 
-Real data stays on `greatlakes.arc-ts.umich.edu`. On Great Lakes, in the checked-out
-repository with dependencies available, the same catalog supports:
+Real data stays on Great Lakes. Start with the one-file exercise below. Later,
+inside a compute allocation with dependencies available, the full catalog supports:
 
 ```sh
 NUMERATOR_ROOT=/nfs/turbo/bus-kbaldata/Numerator python -m numerator_onboarding.catalog
@@ -100,3 +299,45 @@ The catalog discovers tables rather than hardcoding this list.
 Implementation lives in `src/numerator_onboarding/`; tests always select the
 synthetic fixture or temporary data explicitly, even if `NUMERATOR_ROOT` points
 elsewhere. No pandas dependency is used.
+
+## Debugging
+
+Check failures one layer at a time:
+
+| Symptom | First check |
+| --- | --- |
+| SSH fails | Account access, network/VPN requirements, and password/MFA; Python is not involved yet. |
+| Slurm rejects the request | Allocation account and partition eligibility; ask the allocation owner if unknown. |
+| Job remains pending | `squeue -u "$USER"` shows its state/reason; wait for resources. |
+| Python import fails | `which python`, `python --version`, and `python -m pip show numerator-onboarding pyarrow duckdb`; activate the cluster `.venv`. |
+| Metadata check fails | Verify the selected file and read permissions on Great Lakes; first rerun the synthetic catalog to separate environment problems from input problems. |
+| Catalog prints `[]` | It found no Parquet files under immediate child directories; verify the root and directory layout. |
+
+Catalog errors deliberately omit backend details because those can contain
+identifiers in paths or partition values. Reproduce with synthetic inputs before
+sharing an error. There is no automatic cluster detection in the Python code;
+the researcher must check the allocation and hostname before real-data work.
+
+For browser-editor problems, separate the layers:
+
+| Symptom | First check |
+| --- | --- |
+| Portal will not open | U-M access/network/VPN and login; the repository is not involved yet. |
+| Extensions cannot download or Codex cannot connect | Ensure the proxy is sourced by the setup file **before** launching VS Code. Setting it only in a terminal does not update an already-running extension. Relaunch the editor allocation with the setup file. |
+| Browser redirects to localhost during sign-in | Use Codex's device-code login instead. |
+| Device login is refused | Enable device-code sign-in in ChatGPT Security settings and request a fresh code. |
+| Editor URL stops working | Check whether the allocation expired; reconnect or launch a new session from the portal. |
+| Python works over SSH but not in browser VS Code | Verify the setup file activates the same environment before editor launch; check the ITS environment compatibility guidance below. |
+| Codex cannot run a command | Read its exact error. Do not automatically disable sandboxing or grant full access; first distinguish environment, proxy, authentication, and command-permission failures. |
+
+For Codex troubleshooting, share the failed command and sanitized error, the
+hostname/job state, interpreter version, and synthetic test result. Never share
+authentication files, raw observations, or identifiers. Ask Codex to reproduce
+problems against the fixture before escalating to the project owner.
+
+Official references:
+
+- [Great Lakes interactive allocations](https://documentation.its.umich.edu/node/4983)
+- [Great Lakes defaults and limits](https://documentation.its.umich.edu/arc-hpc/greatlakes/user-guide/defaults-limits)
+- [ITS VS Code, Open OnDemand, and proxy guidance](https://documentation.its.umich.edu/arc-hpc/open-ondemand/vs-code)
+- [OpenAI Codex IDE extension](https://developers.openai.com/codex/ide)

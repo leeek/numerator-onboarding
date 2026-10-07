@@ -1,4 +1,6 @@
-"""Aggregate one table without materializing its observations in Python."""
+"""Aggregate the synthetic fixture without materializing observations in Python."""
+
+from pathlib import Path
 
 import duckdb
 
@@ -6,7 +8,15 @@ from numerator_onboarding.config import data_root
 
 
 def main() -> None:
-    pattern = str(data_root() / "summarylvl_fact_table" / "**" / "*.parquet")
+    fixture = Path(__file__).resolve().parents[1] / "tests/data/fake_numerator"
+    # Compare paths without opening or resolving the configured data directory.
+    # This teaching query has no partition filter and must stay synthetic-only.
+    if data_root().absolute() != fixture:
+        raise SystemExit(
+            "This example only accepts tests/data/fake_numerator. "
+            "Set NUMERATOR_ROOT=tests/data/fake_numerator from the repository root."
+        )
+    pattern = str(fixture / "summarylvl_fact_table" / "**" / "*.parquet")
     with duckdb.connect() as connection:
         result = connection.execute(
             """
