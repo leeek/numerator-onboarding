@@ -4,6 +4,50 @@ A small metadata-first Python exercise for University of Michigan faculty and
 researchers. Local development uses invented data only; no real Numerator data
 is included or needed. Requires Python 3.10 or newer.
 
+## Start here: let an assistant help with setup
+
+You do not need to understand every shell command before starting. The suggested
+route is to have a desktop assistant work through this guide with you, then use
+Codex inside Great Lakes browser VS Code for everyday research. The explicit
+commands below remain available for checking what happened and diagnosing failures.
+
+1. Install and sign in to the **ChatGPT desktop app** on your Mac or Windows PC.
+   Select **Codex** (or ChatGPT **Work**), and use **This computer** for the task.
+2. Open **Plugins → Computer Use** and install/enable it. Follow its permission
+   prompts. In **Settings → Computer use**, connect Google Chrome using the
+   offered browser-extension setup. Availability depends on your account and region.
+3. In Chrome, sign in to **GitHub** and **Great Lakes Open OnDemand**. Have your
+   own Slurm account name ready; the next section explains what that is.
+4. Start a desktop task with `@Chrome` and paste the prompt below. You can provide
+   this repository's URL without first downloading or cloning anything yourself.
+5. Stay available for passwords, U-M MFA, ChatGPT sign-in, and permission prompts.
+   Once setup passes its checks, continue research in the Codex sidebar of the
+   Great Lakes browser editor.
+
+Copy this prompt, replacing the two placeholders:
+
+> @Chrome Help me set up https://github.com/leeek/numerator-onboarding on University
+> of Michigan Great Lakes. Read its README.md and AGENTS.md first. My uniqname is
+> YOUR_UNIQNAME and my authorized Slurm account is YOUR_SLURM_ACCOUNT. I am an
+> empirical researcher, not a software engineer. Inspect what is already installed
+> and complete the setup steps you can; explain briefly what each stage does.
+> Use browser VS Code through Open OnDemand with 12 hours, 2 cores, and 8 GB.
+> Help me create a private copy using the GitHub template, or start with the public
+> starter for practice if Git authentication would delay setup. Keep Python work
+> on an allocated compute node and use synthetic data only during setup. Do not
+> access real Numerator data, overwrite existing work, or change account-security
+> settings automatically. Let me handle authentication and required approvals.
+> Finish by checking the node/job, Python environment, tests, synthetic catalog,
+> and Codex command execution. Show me how to reconnect and stop the allocation.
+
+This is guided assistance, not a guaranteed unattended installer. If Computer Use
+is unavailable, use the manual instructions below and ask your assistant to explain
+one step or error at a time. A regular web chat does not have access to your local
+signed-in browser merely because you share this URL.
+
+See OpenAI's [Computer Use setup](https://learn.chatgpt.com/docs/computer-use) and
+[desktop/browser task guide](https://learn.chatgpt.com/use-cases/use-your-computer-with-codex).
+
 ## Accounts and your own project
 
 Obtain your own Great Lakes access and an authorized Slurm allocation/billing
@@ -13,8 +57,10 @@ appended to the uniqname). This is an example, not a naming rule: confirm your
 assigned account rather than guessing it. Access to the Numerator directory is
 separate from access to this starter repository.
 
-This is a public GitHub template. To start your own research project, click
-**Use this template → Create a new repository**, give your project a name, and
+This is a public GitHub template. **Sign in to GitHub first** (create a free
+GitHub account if you do not have one), then return to
+[this repository](https://github.com/leeek/numerator-onboarding). To start your own
+research project, click **Use this template → Create a new repository**, give your project a name, and
 choose **Private**. Then clone your new repository onto Great Lakes
 using its **Code → HTTPS** URL in the clone command below. This makes an independent
 starting copy; later starter updates are not applied automatically. If you choose
@@ -25,14 +71,15 @@ data outside Git, even in a private repository.
 For a first practice session, cloning the starter directly is sufficient. You do
 not need to create a fork or learn how to synchronize one to run the exercises.
 
-## Where to start
+## Manual setup: overview
 
-For Great Lakes, complete **One-time cluster checkout and Python environment**
+If using the assistant above, let it work through these steps with you; this is
+also the reference for doing setup yourself. Complete **One-time cluster checkout and Python environment**
 below, then use **Great Lakes browser VS Code** for everyday work. Local practice
 is optional. The initial SSH setup creates files and an environment; daily work
 uses the browser and does not require configuring Remote-SSH.
 
-## One-time cluster checkout and Python environment: explicit commands
+## One-time cluster checkout and Python environment
 
 If transferring changes from an existing local checkout, commit and push the code
 you intend to run. Check `git status --short` and `git diff --cached` first. A new
@@ -104,6 +151,15 @@ The tested module is `python/3.12.1`; use it consistently when creating and
 activating the environment.
 If installation cannot reach the package index from the compute node, follow
 ITS's documented proxy setup (`source /etc/profile.d/http_proxy.sh`) and retry.
+
+**Why an explicit Python version?** `module load python` selects the cluster's
+current default, which can change. The guide uses `python/3.12.1` because that
+exact setup passed the environment, package, and browser-editor checks. Python
+3.13.2 is a reasonable candidate, but has not been validated for this workflow;
+being the default does not itself make it more robust. If changing versions,
+create a separate environment, use the same explicit module in the editor setup
+file, and rerun the synthetic checks. Loading another module does not upgrade an
+existing `.venv`. Keep the working environment until the replacement passes.
 
 ## Great Lakes browser VS Code: daily workflow
 
@@ -287,7 +343,7 @@ to exist in the real tables.
 
 ## Working with real data
 
-Real data stays on Great Lakes. Start with the one-file exercise below. Later,
+Real data stays on Great Lakes. Start with the one-file exercise above. Later,
 inside a compute allocation with dependencies available, the full catalog supports:
 
 ```sh
