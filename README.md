@@ -67,10 +67,8 @@ Copy this prompt, replacing the two placeholders:
 > Finish by checking the node/job, Python environment, tests, synthetic catalog,
 > and Codex command execution. Show me how to reconnect and stop the allocation.
 
-This is guided assistance, not a guaranteed unattended installer. If Computer Use
-is unavailable, use the manual instructions below and ask your assistant to explain
-one step or error at a time. A regular web chat does not have access to your local
-signed-in browser merely because you share this URL.
+If Computer Use is unavailable, follow the manual instructions below and ask your
+assistant to explain one step or error at a time.
 
 See OpenAI's [Computer Use setup](https://learn.chatgpt.com/docs/computer-use) and
 [desktop/browser task guide](https://learn.chatgpt.com/use-cases/use-your-computer-with-codex).
@@ -80,13 +78,12 @@ See OpenAI's [Computer Use setup](https://learn.chatgpt.com/docs/computer-use) a
 This is a public GitHub template. **Sign in to GitHub first** (create a free
 GitHub account if you do not have one), then return to
 [this repository](https://github.com/leeek/numerator-onboarding). To start your own
-research project, click **Use this template → Create a new repository**, give your project a name, and
-choose **Private**. Then clone your new repository onto Great Lakes
+research project, click **Use this template → Create a new repository**, give your
+project a name, and choose **Private**. Then clone your new repository onto Great Lakes
 using its **Code → HTTPS** URL in the clone command below. This makes an independent
 starting copy; later starter updates are not applied automatically. If you choose
 a different project name, use that folder name everywhere below, including in
-the setup file. Keep research
-data outside Git, even in a private repository.
+the setup file. Keep research data outside Git, even in a private repository.
 
 For a first practice session, cloning the starter directly is sufficient. You do
 not need to create a fork or learn how to synchronize one to run the exercises.
@@ -101,9 +98,6 @@ uses the browser and does not require configuring Remote-SSH.
 
 ## One-time cluster checkout and Python environment
 
-If transferring changes from an existing local checkout, commit and push the code
-you intend to run. Check `git status --short` and `git diff --cached` first. A new
-user can start by cloning without making any commits.
 Replace `YOUR_UNIQNAME` and `YOUR_SLURM_ACCOUNT` below with your own values. The
 Slurm account is an allocation/billing account, not necessarily your uniqname.
 
@@ -125,10 +119,6 @@ git clone https://github.com/leeek/numerator-onboarding.git
 cd numerator-onboarding
 git log -1 --oneline
 ```
-
-For later sessions, use `cd ~/numerator-onboarding` and `git pull --ff-only`
-instead. Stop if Git reports conflicting local changes; do not reset them away.
-Check that the commit matches the one you intended to transfer.
 
 Request an 18-hour interactive allocation:
 
@@ -166,20 +156,9 @@ NUMERATOR_ROOT=tests/data/fake_numerator python examples/duckdb_query.py
 Once verification succeeds, create the setup file in the browser workflow below,
 then exit this one-time interactive shell to release its allocation.
 
-On subsequent terminal sessions, load the same Python module and activate `.venv` again.
-The tested module is `python/3.12.1`; use it consistently when creating and
-activating the environment.
-If installation cannot reach the package index from the compute node, follow
-ITS's documented proxy setup (`source /etc/profile.d/http_proxy.sh`) and retry.
-
-**Why an explicit Python version?** `module load python` selects the cluster's
-current default, which can change. The guide uses `python/3.12.1` because that
-exact setup passed the environment, package, and browser-editor checks. Python
-3.13.2 is a reasonable candidate, but has not been validated for this workflow;
-being the default does not itself make it more robust. If changing versions,
-create a separate environment, use the same explicit module in the editor setup
-file, and rerun the synthetic checks. Loading another module does not upgrade an
-existing `.venv`. Keep the working environment until the replacement passes.
+Use `python/3.12.1` consistently when creating the environment and in the editor
+setup file below. Specifying the version avoids depending on a changing cluster
+default. Loading a different module does not upgrade an existing `.venv`.
 
 ## Great Lakes browser VS Code: daily workflow
 
@@ -191,8 +170,8 @@ using the explicit one-time commands above. For later sessions, reuse the setup
 file and installed extensions; start at step 2. If a session is still running,
 reconnect through **My Interactive Sessions** instead of launching another job.
 
-1. Create `~/numerator-ood-setup.sh` on Great Lakes using a text editor. Its contents
-   should be the following (replace the environment path and use the same Python
+1. **First session only:** create `~/numerator-ood-setup.sh` on Great Lakes using
+   a text editor. Its contents should be the following (replace the environment path and use the same Python
    module that created your environment):
 
    ```sh
@@ -202,14 +181,12 @@ reconnect through **My Interactive Sessions** instead of launching another job.
    ```
 
    This short file is sourced **before the editor starts**, so extensions inherit
-   the compute-node internet proxy and Python environment. It does not submit jobs
-   or hide Slurm commands. Keep the module line consistent with the environment
-   creation command.
+   the compute-node internet proxy and Python environment.
 
 2. Open [Great Lakes Open OnDemand](https://greatlakes.arc-ts.umich.edu), sign in,
    and choose **Interactive Apps → Visual Studio Code**. Request your own Slurm
    account, `standard` partition, **18 hours**, **2 cores**, and **8 GB total memory**.
-   Select code-server **4.112.0** if available (the pilot version). Set **Source this
+   Select code-server **4.112.0** if available. Set **Source this
    setup file** to `/home/YOUR_UNIQNAME/numerator-ood-setup.sh`. Launch the job.
 3. Under **My Interactive Sessions**, wait for **Running**, then **Connect to VS Code**.
    Open your cluster repository folder. In **Terminal → New Terminal**, run:
@@ -233,10 +210,10 @@ reconnect through **My Interactive Sessions** instead of launching another job.
    Installation normally persists in your Great Lakes home directory, so you do
    not need to reinstall for each allocation or compute node. On later sessions,
    open the Codex sidebar directly; sign in again only if prompted. Each researcher
-   installs under their own Great Lakes account. We verified persistence across
-   two allocations on different nodes.
-5. Ask Codex to verify the installation using the prompt below. Keep execution in
-   this workspace, rather than delegating the task to a cloud environment:
+   installs under their own Great Lakes account.
+5. **First session or troubleshooting:** ask Codex to verify the installation
+   using the prompt below. Keep execution in this workspace, rather than delegating
+   the task to a cloud environment:
 
    > Read AGENTS.md. Check hostname and SLURM_JOB_ID and confirm this is an allocated
    > compute node. Use .venv/bin/python with NUMERATOR_ROOT=tests/data/fake_numerator
@@ -249,15 +226,6 @@ browser. Closing the browser does not release the allocation. When finished,
 stop/delete that specific session in the portal to release its resources. When
 its time limit expires, launch a new session; the old compute-node URL is temporary.
 The checkout lives in your home directory, so it survives allocation expiry.
-
-**Validation:** code-server 4.112.0, the official Codex extension, and Python 3.12
-were exercised on a Great Lakes compute node. Codex ran tests and the synthetic
-catalog; browser reload preserved sign-in and the completed chat. A separate
-checkout and new environment created with `python/3.12.1` also passed the tests,
-catalog, and DuckDB example. A second 12-hour allocation on a different compute
-node retained the Codex installation and sign-in; Codex ran all 10 tests there.
-A one-file real Parquet footer check also succeeded without reading observations.
-Extension versions may change through auto-update.
 
 ## Choosing resources and batch jobs
 
@@ -279,10 +247,9 @@ Set these fields in the Open OnDemand launch form before starting a new session:
 | Memory (GB) | **8 GB total** | Increase when a measured pilot needs more memory, especially for joins, sorts, and large intermediate results. |
 | Source this setup file | Your `numerator-ood-setup.sh` | Change when switching project environments; keep its Python module and environment path consistent. |
 
-These are development defaults, not sizing advice for the full Numerator dataset.
-As a modest next experiment, 4 cores and 16 GB may suit a larger interactive pilot,
-but measure rather than treating those numbers as a guarantee. Larger requests
-can wait longer in the queue and reserve more shared resources. Save your work
+Choose larger resource requests based on a small trial run of your workload.
+Larger requests can wait longer in the queue and reserve more shared resources.
+Save your work
 and launch a new allocation to change the resource request; changing a Python
 setting does not enlarge the current Slurm allocation. Stop sessions when finished.
 
@@ -327,10 +294,8 @@ References: [Slurm batch submission](https://slurm.schedmd.com/sbatch.html),
 
 For cleaned or derived tables you intend to keep, use **approved project storage
 accessible from Great Lakes**, usually your research group's **Turbo allocation**.
-This is a recommended storage pattern, not a requirement to use one particular
-volume or directory. Before starting a substantial cleaning run, confirm the
-output location, available space, and collaborator permissions with your project
-owner or Ross Research Computing. Access to the shared Numerator source does not
+Before starting a substantial cleaning run, confirm the output location, available
+space, and collaborator permissions with your project owner or Ross Research Computing. Access to the shared Numerator source does not
 automatically provide a project output allocation.
 
 | Location | What belongs there |
@@ -384,8 +349,7 @@ PY
 
 The result describes that file only, not table-wide row counts or schema
 consistency. The full catalog visits every matching file, so run it later in a
-compute allocation after the one-file check succeeds. A one-file footer check
-has been exercised on an allocated Great Lakes compute node. It does not validate a full-tree catalog or an observation scan.
+compute allocation after the one-file check succeeds.
 
 ## Local practice with synthetic data
 
@@ -402,30 +366,25 @@ numerator-catalog
 python examples/duckdb_query.py
 ```
 
-With `NUMERATOR_ROOT` unset, the editable checkout defaults to the same synthetic
-fixture. An explicitly empty variable is rejected. For a non-editable installation,
-set `NUMERATOR_ROOT` explicitly: fixtures are not packaged in the wheel.
+With `NUMERATOR_ROOT` unset, this checkout defaults to the same synthetic fixture.
 
 ## Exercise 1: inspect before querying
 
 Run `numerator-catalog` (equivalently `python -m numerator_onboarding.catalog`).
-Its JSON output reports each table's name, recursive `.parquet` file count, total
-rows, compressed file bytes, and column names/types/nullability. Every immediate
-child directory containing Parquet files is a table; documentation and empty
-directories are skipped. All matching files are counted, so use a stable dataset
-without duplicate or staging files.
+Its JSON output reports table names, Parquet file counts, row counts, compressed
+file sizes, and column names and types. It treats each directory directly under
+the data root as a table and finds Parquet files in its subdirectories. Directories
+without Parquet files are skipped.
 
-Row counts come from Parquet footer metadata, with no observation scan or pandas
-load. Size is the sum of file lengths, including compressed data and Parquet
-overhead, not filesystem allocation blocks or uncompressed memory size. All files
-are inspected, so metadata work still takes time on large trees. Invalid or
-unreadable files fail the run instead of producing a partial catalog.
+Row counts come from Parquet footers without reading observations. File sizes
+describe disk storage, not the memory needed for analysis. Every file is inspected,
+so cataloging a large dataset can still take time. An unreadable or invalid file
+stops the catalog rather than producing an incomplete result.
 
-Each distinct physical schema is reported with its file count; inspect variations
-before writing queries. Directory-only Hive partition keys such as `year` and
-`month` are not physical columns and are not included in the catalog. Arrow schema
-annotations are omitted. The catalog prints schema information, never row values
-or file paths.
+If column definitions differ between files, the catalog reports each version.
+Check these differences before writing queries. Partition labels stored only in
+directory names, such as `year` or `month`, are not included as columns. The catalog
+prints column definitions, never observation values or file paths.
 
 The fixture has three tables, each with two nested `year=2026/month=...` partitions:
 
@@ -453,8 +412,7 @@ online | 2 | 16.50
 
 This teaching example rejects a `NUMERATOR_ROOT` other than the repository's
 synthetic fixture, before opening DuckDB. DuckDB recognizes Hive directory partitions.
-Unlike the catalog, this query scans
-selected column data. A small result or a `LIMIT` does not guarantee a small scan.
+Unlike the catalog, this query scans selected column data. A small result or a `LIMIT` does not guarantee a small scan.
 Before adapting it to real data, inspect the actual schema and add appropriate
 partition filters. The illustrative `channel` and `spend` fields are not promised
 to exist in the real tables.
@@ -482,10 +440,6 @@ The catalog discovers tables rather than hardcoding this list.
   nodes**. For a large metadata crawl, use a compute allocation as well.
 - `.gitignore` blocks common data formats but cannot enforce these rules. Its
   fixture exception is for generated synthetic data only. Review staged files.
-
-Implementation lives in `src/numerator_onboarding/`; tests always select the
-synthetic fixture or temporary data explicitly, even if `NUMERATOR_ROOT` points
-elsewhere. No pandas dependency is used.
 
 ## Debugging
 
