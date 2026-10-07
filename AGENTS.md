@@ -9,4 +9,7 @@
 - Real data stays on Great Lakes at `/nfs/turbo/bus-kbaldata/Numerator`. Large scans must run on allocated compute nodes, not login nodes.
 - Configure input through `NUMERATOR_ROOT`; tests must explicitly select synthetic or temporary inputs and ignore any production environment setting.
 - Keep the catalog metadata-only: use Parquet footers for row counts, and never load observations into pandas or Arrow tables to catalog them.
+- For small test runs, select explicit purchase files or row groups first, then obtain matching records from all relevant lookup files or a verified index. Do not independently sample each table and assume join coverage.
+- Before joining, check lookup-key uniqueness and conflicting attributes. Consolidate repeated lookup keys only when the attributes needed for the analysis agree. Do not automatically deduplicate purchase rows; identical receipt lines may be legitimate.
+- Validate lookup joins with left joins before applying research filters. Report unmatched-key rates by analysis period and verify that lookup enrichment preserves purchase-row counts and dollar totals. Investigate unexplained missing matches before scaling up.
 - Keep ordinary Python and a small dependency set. After changes run `.venv/bin/python -m pytest` and the synthetic catalog with `NUMERATOR_ROOT=tests/data/fake_numerator`.
