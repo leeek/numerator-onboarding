@@ -28,8 +28,7 @@ Before starting the Great Lakes setup, have the following ready:
   repository. You can complete setup and the synthetic exercises while waiting
   for approval; real-data work requires that access to be granted.
 - **A GitHub account.** Sign in before creating your own project from the template.
-  If you do not have an account, create one first. You can browse this guide and
-  clone the public starter for practice without signing in.
+  If you do not have an account, create one first.
 
 ## Start here: let an assistant help with setup
 
@@ -59,9 +58,11 @@ Copy this prompt, replacing the two placeholders:
 > empirical researcher, not a software engineer. Inspect what is already installed
 > and complete the setup steps you can; explain briefly what each stage does.
 > Use browser VS Code through Open OnDemand with 18 hours, 2 cores, and 8 GB.
-> Help me create a private copy using the GitHub template, or start with the public
-> starter for practice if Git authentication would delay setup. Keep Python work
-> on an allocated compute node and use synthetic data only during setup. Do not
+> Help me create a private copy using the GitHub template and clone my copy onto
+> Great Lakes. Use ~/numerator-onboarding as the checkout folder for this setup.
+> Help configure Git authentication if needed without requesting my credentials.
+> Keep Python work on an allocated compute node and use synthetic data only during
+> setup. Do not
 > access real Numerator data, overwrite existing work, or change account-security
 > settings automatically. Let me handle authentication and required approvals.
 > Finish by checking the node/job, Python environment, tests, synthetic catalog,
@@ -79,14 +80,14 @@ This is a public GitHub template. **Sign in to GitHub first** (create a free
 GitHub account if you do not have one), then return to
 [this repository](https://github.com/leeek/numerator-onboarding). To start your own
 research project, click **Use this template → Create a new repository**, give your
-project a name, and choose **Private**. Then clone your new repository onto Great Lakes
-using its **Code → HTTPS** URL in the clone command below. This makes an independent
-starting copy; later starter updates are not applied automatically. If you choose
-a different project name, use that folder name everywhere below, including in
-the setup file. Keep research data outside Git, even in a private repository.
+project a name, and choose **Private**. Copy your new repository's **Code → HTTPS**
+URL for the clone command below. This gives you an independent project; later
+starter updates are not applied automatically.
 
-For a first practice session, cloning the starter directly is sufficient. You do
-not need to create a fork or learn how to synchronize one to run the exercises.
+The commands below put your project in `~/numerator-onboarding` on Great Lakes,
+regardless of its GitHub name. If you use a different folder, update the paths
+throughout the guide, including the editor setup file. Keep research data outside
+Git, even in a private repository.
 
 ## Manual setup: overview
 
@@ -108,14 +109,19 @@ ssh YOUR_UNIQNAME@greatlakes.arc-ts.umich.edu
 ```
 
 Complete password/MFA authentication yourself. On the Great Lakes login node,
-clone once. The public starter requires no GitHub login. A private template copy
-requires your own GitHub authentication, separate from your U-M login; GitHub
-account passwords do not work for Git HTTPS authentication. Use an existing
-authenticated Git setup or ask Codex to help configure it without sharing tokens.
-For a first practice session, use this public clone command:
+clone your private repository once. GitHub authentication is separate from your
+U-M login; GitHub account passwords do not work for Git HTTPS authentication.
+Use an existing authenticated Git setup or ask Codex to help configure it without
+sharing tokens.
+
+Replace `YOUR_REPOSITORY_HTTPS_URL` with the URL you copied from **your private
+repository**, and run these commands from your home directory. If
+`~/numerator-onboarding` already exists, use that checkout if it is your project;
+ask Codex to inspect it before proceeding if you are unsure.
 
 ```sh
-git clone https://github.com/leeek/numerator-onboarding.git
+cd ~
+git clone YOUR_REPOSITORY_HTTPS_URL numerator-onboarding
 cd numerator-onboarding
 git log -1 --oneline
 ```
@@ -317,39 +323,23 @@ and the [Turbo storage guide](https://documentation.its.umich.edu/arc-storage/tu
 
 ## First real-data check: one Parquet footer
 
-Only when you decide to inspect real metadata, use one known Parquet file in
-the allocated shell. Obtain its relative path on Great Lakes from your data
-manager or by browsing there; do not paste filenames containing identifiers
-into an AI chat. Replace the sample relative path below. This reads one footer,
-without recursively discovering files, reading column statistics, or scanning
-observations:
+Once your Numerator access is approved and the synthetic checks pass, paste this
+prompt into **Codex inside Great Lakes browser VS Code**:
 
-```sh
-NUMERATOR_ROOT=/nfs/turbo/bus-kbaldata/Numerator python - 'people_table/REPLACE_WITH_RELATIVE_FILE.parquet' <<'PY'
-import json
-import sys
-import pyarrow.parquet as pq
-from numerator_onboarding.config import data_root
+> Read AGENTS.md. Confirm that the hostname and Slurm job match an active compute
+> allocation. Use this Great Lakes workspace and .venv/bin/python, with
+> NUMERATOR_ROOT=/nfs/turbo/bus-kbaldata/Numerator. Find one Parquet file under
+> people_table using incremental directory traversal that stops at the first
+> match; do not build a full file listing or run the full catalog. Use PyArrow to
+> read only that file's footer. Report its row count and column names/types, without
+> printing its path, column statistics, identifiers, or observation values. Do not
+> read data rows, modify the source data, or save data or metadata in Git. If access
+> fails, explain the failing step and what I need to resolve. Explain what the
+> successful check tells me and suggest a small next step without running a scan.
 
-try:
-    with pq.ParquetFile(data_root() / sys.argv[1]) as parquet:
-        result = {
-            "files_inspected": 1,
-            "rows_in_this_file": parquet.metadata.num_rows,
-            "columns": [
-                {"name": field.name, "type": str(field.type), "nullable": field.nullable}
-                for field in parquet.schema_arrow
-            ],
-        }
-except Exception:
-    raise SystemExit("Metadata check failed: check the path, access, and Parquet format on Great Lakes.") from None
-print(json.dumps(result, indent=2))
-PY
-```
-
-The result describes that file only, not table-wide row counts or schema
-consistency. The full catalog visits every matching file, so run it later in a
-compute allocation after the one-file check succeeds.
+This checks access and the structure of one file. It does not establish table-wide
+row counts or schema consistency. The full catalog visits every matching file;
+use it later in a compute allocation when you are ready for that metadata crawl.
 
 ## Local practice with synthetic data
 
