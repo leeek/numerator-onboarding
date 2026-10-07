@@ -224,12 +224,17 @@ reconnect through **My Interactive Sessions** instead of launching another job.
 
    Match the hostname and job ID to the portal session. Stop if you are on a login
    node. The fixture counts should be 4, 4, and 6 rows (see the fixture table below).
-4. Open **Extensions**, search for **Codex**, and install **Codex – OpenAI's coding
+4. **First session only:** open **Extensions**, search for **Codex**, and install **Codex – OpenAI's coding
    agent**, publisher **openai**, identifier **openai.chatgpt**. Open its sidebar.
    Choose ChatGPT sign-in using a **device code**. Open the displayed authentication
    link in your laptop browser and enter the code. If asked, enable device-code
    sign-in in your ChatGPT account's Security settings yourself, then retry.
    Keep authentication codes and credential files out of this repository.
+   Installation normally persists in your Great Lakes home directory, so you do
+   not need to reinstall for each allocation or compute node. On later sessions,
+   open the Codex sidebar directly; sign in again only if prompted. Each researcher
+   installs under their own Great Lakes account. We verified persistence across
+   two allocations on different nodes.
 5. Ask Codex to verify the installation using the prompt below. Keep execution in
    this workspace, rather than delegating the task to a cloud environment:
 
@@ -296,7 +301,7 @@ allocation. Slurm runs it on allocated compute resources and writes its logs;
 it does not depend on keeping the editor session alive. Keep the account, paths,
 and resource requests visible in an ordinary `.sbatch` file. Do not run a large
 cleaning script directly on a login node. Store real-data outputs and potentially
-sensitive logs outside this repository in an approved Great Lakes location.
+sensitive logs outside this repository; see [where to store cleaned tables](#where-to-store-cleaned-tables).
 
 Before scaling up, select only needed partitions and columns, measure elapsed time
 and peak memory, and leave headroom. Compressed Parquet file size is not the memory
@@ -317,6 +322,33 @@ A useful request to Codex once your small pilot works:
 References: [Slurm batch submission](https://slurm.schedmd.com/sbatch.html),
 [job accounting and memory statistics](https://slurm.schedmd.com/sacct.html), and
 [Great Lakes limits](https://documentation.its.umich.edu/arc-hpc/greatlakes/user-guide/defaults-limits).
+
+## Where to store cleaned tables
+
+For cleaned or derived tables you intend to keep, use **approved project storage
+accessible from Great Lakes**, usually your research group's **Turbo allocation**.
+This is a recommended storage pattern, not a requirement to use one particular
+volume or directory. Before starting a substantial cleaning run, confirm the
+output location, available space, and collaborator permissions with your project
+owner or Ross Research Computing. Access to the shared Numerator source does not
+automatically provide a project output allocation.
+
+| Location | What belongs there |
+| --- | --- |
+| Home directory | Code checkout, Python environment, and small configuration files. |
+| Scratch | Temporary intermediates and spill files that can be regenerated. |
+| Approved project storage (typically Turbo) | Retained cleaned tables and other derived research datasets. |
+| Your GitHub repository | Code and documentation needed to reproduce the work, not Numerator data or derived tables. |
+
+Keep outputs separate from `/nfs/turbo/bus-kbaldata/Numerator`; treat that shared
+source as read-only for your workflow. Configure an explicit output path outside
+the Git checkout. Do not use scratch as the only copy of important results:
+Great Lakes documents an 80 GB home quota and scratch deletion after 60 days
+without access. Confirm your project storage's retention and data-protection
+arrangements rather than assuming every volume has the same configuration.
+
+See [Great Lakes storage guidance](https://documentation.its.umich.edu/arc-hpc/greatlakes/user-guide/defaults-limits)
+and the [Turbo storage guide](https://documentation.its.umich.edu/arc-storage/turbo).
 
 ## First real-data check: one Parquet footer
 
