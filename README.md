@@ -409,17 +409,50 @@ to exist in the real tables.
 
 ## Working with real data
 
-Real data stays on Great Lakes. Start with the one-file exercise above. Later,
-inside a compute allocation with dependencies available, the full catalog supports:
+After the [one-file metadata check](#first-real-data-check-one-parquet-footer)
+succeeds, continue in Codex inside Great Lakes browser VS Code:
+
+1. **Describe your research task.** Tell Codex the population, time period, and
+   output you want—for example, a household-by-month table of spending in a
+   particular category. Explain any definitions you already have and ask it to
+   flag unresolved choices.
+2. **Understand the relevant tables.** Consult the documentation in
+   `0-Data_Description_and_Schemas` and inspect metadata for the tables you need.
+   Confirm what each row represents, which variables define your sample, and how
+   tables join. Do not assume the synthetic example's columns exist in real data.
+3. **Build a small pilot.** Select explicit files or partitions and only the
+   columns needed. Check missingness, duplicates, and row counts before and after
+   joins using aggregate summaries. A small result or `LIMIT` alone does not make
+   a query a small scan. Measure runtime and memory before expanding the input.
+4. **Save and scale.** Store derived tables in
+   [project storage](#where-to-store-cleaned-tables), with code and documentation
+   committed and pushed to your private GitHub repository. For larger or repeatable
+   runs, follow [the batch-job guidance](#choosing-resources-and-batch-jobs).
+
+To start, replace the bracketed text and paste this into the remote Codex sidebar:
+
+> Read AGENTS.md. My research task is [describe the population, time period, and
+> desired output]. Confirm this workspace is on an active Great Lakes compute
+> allocation. Use .venv/bin/python and set
+> NUMERATOR_ROOT=/nfs/turbo/bus-kbaldata/Numerator for real-data work. Consult the
+> data documentation and relevant Parquet metadata to identify candidate tables,
+> variables, and join keys. Explain what each row represents and flag definitions
+> that need my input. Propose a small pilot with explicit input files or partitions,
+> columns, aggregate validation checks, and a project-storage output path. Ask me
+> about missing research definitions or storage access. Show me the pilot plan
+> before reading observations; do not run a full scan. Keep observations and
+> identifiers out of logs and chat, and keep data outside the Git repository.
+
+**Optional: catalog the full dataset.** You do not need a full inventory before
+working with a few relevant tables. If you need one, this command reads the footer
+of every Parquet file under the table directories, which can take time. Run it
+from your repository folder inside a compute allocation:
 
 ```sh
-NUMERATOR_ROOT=/nfs/turbo/bus-kbaldata/Numerator python -m numerator_onboarding.catalog
+NUMERATOR_ROOT=/nfs/turbo/bus-kbaldata/Numerator .venv/bin/python -m numerator_onboarding.catalog
 ```
 
-The known top-level directories are `summarylvl_fact_table`, `people_table`,
-`static_table`, `itemlvl_fact_table`, `item_table`, `people_attributes_table`,
-`people_history_table`, `banner_table`, and `0-Data_Description_and_Schemas`.
-The catalog discovers tables rather than hardcoding this list.
+Real data stays on Great Lakes. Throughout your work:
 
 - **Never commit Numerator data. Never copy raw Numerator observations into this repo.**
 - Develop against synthetic data locally. Do not mount, download, or access real
